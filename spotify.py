@@ -1,12 +1,26 @@
 import streamlit as st
 import pandas as pd
 import numpy as np
+import matplotlib.pyplot as plt
 import requests
 import io
 import gzip
 
 st.title('Spotify Dataset Analysis')
 
+df = pd.read_csv('spotify_dataset.csv')
+st.write(df.head())
+
+english_songs = df[df['language'] == 'English']
+non_eng = df[df['language'] != 'English']
+
+
+
+songs_by_language = df['language'].value_counts()
+songs_by_language.plot(kind="bar", title="Songs by Language")
+plt.xlabel("Language")
+plt.ylabel("Number of Songs")
+st.pyplot(plt)
 # Tableau embed code
 tableau_html = """
 <div class='tableauPlaceholder' id='viz1736255076662' style='position: relative'>
@@ -46,3 +60,4 @@ tableau_html = """
 
 # Embed the Tableau visualization
 st.components.v1.html(tableau_html, height=900)
+
