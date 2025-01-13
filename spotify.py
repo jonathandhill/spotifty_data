@@ -78,22 +78,50 @@ ax.text(1970, 1.0,
         fontweight='bold', 
         fontfamily='monospace')
 
-features_to_plot = {}
-for feature in audio_features:
-    features_to_plot[feature] = st.checkbox(f'{feature.capitalize()}', value=True) #Default checked
-
-for feature, color in zip(audio_features, colormap):
-    if features_to_plot[feature]:
-        sns.lineplot(data=audio_data.iloc[1:, ], x='year', y=feature, color=color, ax=ax)
+#Initialise session state
+if 'features_to_plot' not in st.session_state:
+    st.session_state.features_to_plot = {feature: True for feature in audio_features}
     
-for direction in ['top','right','left']:
-    ax.spines[direction].set_visible(False)
-    
-ax.tick_params(axis='y', labelsize=14)
-ax.tick_params(axis='x', labelsize=14)
-ax.tick_params(axis = 'y', length=0)  
-ax.set_xlabel('Year', fontsize=15, fontweight='bold')
-ax.set_ylabel('')
-ax.legend(audio_features, loc='upper right', fontsize=10)
+# Define callback functions for the buttons
+def clear_all():
+    for feature in audio_features:
+        st.session_state.features_to_plot[feature] = False
 
-st.pyplot(plt)
+def select_all():
+    for feature in audio_features:
+        st.session_state.features_to_plot[feature] = True
+
+if any(st.session_state.features_to_plot.values()):
+    for feature, color in zip(audio_features, colormap):
+        if st.session_state.features_to_plot[feature]:
+            sns.lineplot(data=audio_data.iloc[1:, ], x='year', y=feature, color=color, label=feature, ax=ax)
+    
+    for direction in ['top','right','left']:
+        ax.spines[direction].set_visible(False)
+        
+    ax.tick_params(axis='y', labelsize=14)
+    ax.tick_params(axis='x', labelsize=14)
+    ax.tick_params(axis = 'y', length=0)  
+    ax.set_xlabel('Year', fontsize=15, fontweight='bold')
+    ax.set_ylabel('')
+    ax.legend(loc='upper right', fontsize=10)
+
+    st.pyplot(plt)
+else:
+    st.info('Please select at least one feature to display the plot.')
+
+col1, col2 = st.columns(2)
+col1.button('Clear All', key='clear_btn', on_click=clear_all)
+col2.button('Select All', key='select_btn', on_click=select_all)
+
+# Create horizontal columns for checkboxes
+num_features = len(audio_features)
+cols = st.columns(num_features)  # Creates one column per feature
+
+# Create checkboxes in horizontal layout
+for idx, (feature, col) in enumerate(zip(audio_features, cols)):
+    st.session_state.features_to_plot[feature] = col.checkbox(
+        f'{feature.capitalize()}',  # Made label shorter by removing 'Show'
+        value=st.session_state.features_to_plot[feature],
+        key=f'checkbox_{feature}'
+    )
