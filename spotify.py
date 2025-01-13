@@ -1,10 +1,10 @@
 import streamlit as st
 import pandas as pd
 import numpy as np
+import seaborn as sns
 import matplotlib.pyplot as plt
-import requests
-import io
-import gzip
+
+st.set_page_config(layout="wide") #Wide mode
 
 st.title('Spotify Dataset Analysis')
 
@@ -61,3 +61,39 @@ tableau_html = """
 # Embed the Tableau visualization
 st.components.v1.html(tableau_html, height=900)
 
+#Features line graph
+audio_features = ['danceability', 'energy', 'speechiness', 'acousticness', 'instrumentalness', 'liveness', 'valence']
+
+colormap = ['#1b9e77','#d95f02','#7570b3','#e7298a','#66a61e','#e6ab02','#a6761d']
+
+audio_data = pd.DataFrame(df.groupby('year')[audio_features].mean().sort_index()).reset_index()
+
+fig = plt.figure(figsize=(20, 8), facecolor='white')
+gs = fig.add_gridspec(1, 1)
+ax = fig.add_subplot(gs[0, 0])
+
+ax.text(1970, 1.0, 
+        'Year Wise Distribution of Audio Features', 
+        fontsize=45, 
+        fontweight='bold', 
+        fontfamily='monospace')
+
+features_to_plot = {}
+for feature in audio_features:
+    features_to_plot[feature] = st.checkbox(f'{feature.capitalize()}', value=True) #Default checked
+
+for feature, color in zip(audio_features, colormap):
+    if features_to_plot[feature]:
+        sns.lineplot(data=audio_data.iloc[1:, ], x='year', y=feature, color=color, ax=ax)
+    
+for direction in ['top','right','left']:
+    ax.spines[direction].set_visible(False)
+    
+ax.tick_params(axis='y', labelsize=14)
+ax.tick_params(axis='x', labelsize=14)
+ax.tick_params(axis = 'y', length=0)  
+ax.set_xlabel('Year', fontsize=15, fontweight='bold')
+ax.set_ylabel('')
+ax.legend(audio_features, loc='upper right', fontsize=10)
+
+st.pyplot(plt)
