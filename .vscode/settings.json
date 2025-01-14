@@ -1,5 +1,6 @@
 {
   "cSpell.words": [
+    "barplot",
     "facecolor",
     "figsize",
     "fontfamily",
@@ -11,6 +12,7 @@
     "labelsize",
     "lineplot",
     "linestyle",
+    "xaxis",
     "xlabel",
     "ylabel",
     "zorder"
