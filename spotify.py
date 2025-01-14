@@ -20,11 +20,41 @@ st.write(df.head())
 english_songs = df[df['language'] == 'English'] 
 non_eng = df[df['language'] != 'English']
 
-songs_by_language = df['language'].value_counts()
-songs_by_language.plot(kind="bar", title="Songs by Language")
-plt.xlabel("Language")
-plt.ylabel("Number of Songs")
-st.pyplot(plt)
+@st.cache_data
+def plot_songs_by_language(df):
+    #Songs by Language
+    df_sorted = df['language'].value_counts().sort_values().reset_index()
+    df_sorted.columns = ['language', 'count']
+
+    canv = plt.figure(figsize = (20,8), facecolor = 'white') #blank canvas with background
+    grid = canv.add_gridspec(1,1) #grid layout
+    subplot = canv.add_subplot(grid[0,0]) #subplot
+
+    subplot.text(3.5, 28000, 
+            'Songs by Language', 
+            fontsize=25, 
+            fontweight='bold', 
+            fontfamily='monospace')
+
+    #Dotted horizontal gridlines
+    subplot.grid(color='black', linestyle=':', axis='y', zorder=0,  dashes=(1,5))
+
+    sns.barplot(data=df_sorted, x ='language', y='count', ax = subplot, alpha = 1, zorder = 2)
+
+    #Remove border lines
+    for direction in ['top','right','left']:
+        subplot.spines[direction].set_visible(False)
+
+    subplot.set_xlabel('Language', fontsize = 14, fontweight = 'bold')
+    subplot.tick_params(axis = 'x', labelsize=14)
+    subplot.tick_params(axis = 'y', length=0, labelsize=13)
+    subplot.set_ylabel('',)
+    subplot.invert_xaxis()
+    return canv
+
+canv = plot_songs_by_language(df)
+st.pyplot(canv)
+
 # Tableau embed code
 tableau_html = """
 <div class='tableauPlaceholder' id='viz1736255076662' style='position: relative'>
@@ -136,29 +166,41 @@ for idx, (feature, col) in enumerate(zip(audio_features, cols)):
         on_change=update_feature_state
     )
 
-#Songs Released (By Decade)
-fig = plt.figure(figsize = (20,8), facecolor = 'white') #blank canvas with background
-gs = fig.add_gridspec(1,1) #grid layout
-ax = fig.add_subplot(gs[0,0]) #subplot
+@st.cache_data
+def year_to_decade(year):
+    decade = (year//10) * 10
+    decade = f'{decade}s'
+    return decade
 
-ax.text(5.5, 35000, 
-        'Songs Released(By Decade)', 
-        fontsize=25, 
-        fontweight='bold', 
-        fontfamily='monospace')
+df['decade'] = df['year'].apply(lambda x: year_to_decade(x))
 
-#Dotted horizontal gridlines
-ax.grid(color='black', linestyle=':', axis='y', zorder=0,  dashes=(1,5))
+@st.cache_data
+def plot_songs_by_decade(df):
+    fig = plt.figure(figsize = (20,8), facecolor = 'white') #blank canvas with background
+    gs = fig.add_gridspec(1,1) #grid layout
+    ax = fig.add_subplot(gs[0,0]) #subplot
 
-sns.countplot(data = df, x ='decade', ax = ax, alpha = 1, zorder = 2)
+    ax.text(3.5, 28000, 
+            'Songs Released(By Decade)', 
+            fontsize=25, 
+            fontweight='bold', 
+            fontfamily='monospace')
 
-#Remove border lines
-for direction in ['top','right','left']:
-    ax.spines[direction].set_visible(False)
+    #Dotted horizontal gridlines
+    ax.grid(color='black', linestyle=':', axis='y', zorder=0,  dashes=(1,5))
 
-ax.set_xlabel('Decade', fontsize = 14, fontweight = 'bold')
-ax.tick_params(axis = 'x', labelsize=14)
-ax.tick_params(axis = 'y', length=0, labelsize=13)
-ax.set_ylabel('',)
-ax.invert_xaxis()
+    sns.countplot(data = df, x ='decade', ax = ax, alpha = 1, zorder = 2)
+
+    #Remove border lines
+    for direction in ['top','right','left']:
+        ax.spines[direction].set_visible(False)
+
+    ax.set_xlabel('Decade', fontsize = 14, fontweight = 'bold')
+    ax.tick_params(axis = 'x', labelsize=14)
+    ax.tick_params(axis = 'y', length=0, labelsize=13)
+    ax.set_ylabel('',)
+    ax.invert_xaxis()
+    return fig
+
+fig = plot_songs_by_decade(df)
 st.pyplot(fig)
