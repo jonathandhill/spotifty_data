@@ -5,11 +5,14 @@
     "fontfamily",
     "fontsize",
     "fontweight",
+    "gridlines",
     "gridspec",
     "iloc",
     "labelsize",
     "lineplot",
+    "linestyle",
     "xlabel",
-    "ylabel"
+    "ylabel",
+    "zorder"
   ]
 }

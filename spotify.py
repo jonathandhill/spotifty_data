@@ -8,13 +8,17 @@ st.set_page_config(layout="wide") #Wide mode
 
 st.title('Spotify Dataset Analysis')
 
-df = pd.read_csv('spotify_dataset.csv')
+@st.cache_data
+def load_data(path):
+    df = pd.read_csv(path)
+    return df
+
+df = load_data('spotify_dataset.csv')
+    
 st.write(df.head())
 
-english_songs = df[df['language'] == 'English']
+english_songs = df[df['language'] == 'English'] 
 non_eng = df[df['language'] != 'English']
-
-
 
 songs_by_language = df['language'].value_counts()
 songs_by_language.plot(kind="bar", title="Songs by Language")
@@ -82,7 +86,7 @@ ax.text(1970, 1.0,
 if 'features_to_plot' not in st.session_state:
     st.session_state.features_to_plot = {feature: True for feature in audio_features}
     
-# Define callback functions for the buttons
+# callback functions for the buttons
 def clear_all():
     for feature in audio_features:
         st.session_state.features_to_plot[feature] = False
@@ -90,6 +94,11 @@ def clear_all():
 def select_all():
     for feature in audio_features:
         st.session_state.features_to_plot[feature] = True
+        
+def update_feature_state():
+    # Update features_to_plot based on checkbox states
+    for feature in audio_features:
+        st.session_state.features_to_plot[feature] = st.session_state[f'checkbox_{feature}']
 
 if any(st.session_state.features_to_plot.values()):
     for feature, color in zip(audio_features, colormap):
@@ -121,7 +130,35 @@ cols = st.columns(num_features)  # Creates one column per feature
 # Create checkboxes in horizontal layout
 for idx, (feature, col) in enumerate(zip(audio_features, cols)):
     st.session_state.features_to_plot[feature] = col.checkbox(
-        f'{feature.capitalize()}',  # Made label shorter by removing 'Show'
+        f'{feature.capitalize()}', 
         value=st.session_state.features_to_plot[feature],
-        key=f'checkbox_{feature}'
+        key=f'checkbox_{feature}', 
+        on_change=update_feature_state
     )
+
+#Songs Released (By Decade)
+fig = plt.figure(figsize = (20,8), facecolor = 'white') #blank canvas with background
+gs = fig.add_gridspec(1,1) #grid layout
+ax = fig.add_subplot(gs[0,0]) #subplot
+
+ax.text(5.5, 35000, 
+        'Songs Released(By Decade)', 
+        fontsize=25, 
+        fontweight='bold', 
+        fontfamily='monospace')
+
+#Dotted horizontal gridlines
+ax.grid(color='black', linestyle=':', axis='y', zorder=0,  dashes=(1,5))
+
+sns.countplot(data = df, x ='decade', ax = ax, alpha = 1, zorder = 2)
+
+#Remove border lines
+for direction in ['top','right','left']:
+    ax.spines[direction].set_visible(False)
+
+ax.set_xlabel('Decade', fontsize = 14, fontweight = 'bold')
+ax.tick_params(axis = 'x', labelsize=14)
+ax.tick_params(axis = 'y', length=0, labelsize=13)
+ax.set_ylabel('',)
+ax.invert_xaxis()
+st.pyplot(fig)
