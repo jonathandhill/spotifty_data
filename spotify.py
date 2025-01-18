@@ -6,8 +6,25 @@ import matplotlib.pyplot as plt
 
 st.set_page_config(layout="wide")  # Wide mode
 
-st.title("Spotify Dataset Analysis")
+st.markdown(
+    """
+    <style>
+    .centered-title {
+        text-align: center;
+    }
+    .centered-header {
+        text-align: center;
+    }
+    </style>
+    """,
+    unsafe_allow_html=True
+)
 
+st.markdown('<h1 class="centered-title">Spotify Dataset Analysis</h1>', unsafe_allow_html=True)
+st.markdown('<div style="display: flex; flex-wrap: wrap; gap: 4px; justify-content: center;"><img src="https://img.shields.io/badge/python-3670A0?style=for-the-badge&logo=python&logoColor=ffdd54" height="32" alt="Python" style="margin-right: 4px"><img src="https://img.shields.io/badge/-Pandas-333333?style=flat&logo=pandas" height="32" alt="Pandas" style="margin-right: 4px"><img src="https://img.shields.io/badge/-Matplotlib-000000?style=flat&logo=python" height="32" alt="Matplotlib" style="margin-right: 4px"><img src="https://img.shields.io/static/v1?label=Powered%20by&message=seaborn&color=E523F5&style=flat" height="32" alt="Seaborn" style="margin-right: 4px"><img src="https://img.shields.io/badge/Jupyter-notebook-brightgreen" height="32" alt="Jupyter" style="margin-right: 4px"><img src="https://img.shields.io/badge/Tableau-E97627?style=for-the-badge&logo=Tableau&logoColor=white" height="32" alt="Tableau" style="margin-right: 4px"></div>', unsafe_allow_html=True)
+st.markdown('<h2 class="centered-header">Jonathan Hill</h2>', unsafe_allow_html=True)
+st.markdown('<p align="center"><a href="https://www.linkedin.com/in/jonathanburthill/" target="_blank"><img src="https://img.shields.io/badge/LinkedIn-0077B5?style=for-the-badge&logo=linkedin&logoColor=white" height="28" style="margin-right: 4px"></a> <a href="https://github.com/jonathandhill" target="_blank"><img src="https://img.shields.io/badge/GitHub-100000?style=for-the-badge&logo=github&logoColor=white" height="28" style="margin-right: 4px"></a> <a href="mailto:jonathan.burt.hill@gmail.com" aria-label="Send an email to Jonathan Hill"><img src="https://img.shields.io/badge/Gmail-D14836?style=for-the-badge&logo=gmail&logoColor=white" height="28" style="margin-right: 4px"></a></p>', unsafe_allow_html=True)
+st.divider()
 
 @st.cache_data
 def load_data(path):
@@ -20,22 +37,36 @@ df = load_data("spotify_dataset.csv")
 english_songs = df[df["language"] == "English"]
 non_eng = df[df["language"] != "English"]
 
-top_prol_artist, shakar, col3, col4 = st.columns(4)
+top_prol_artists_col, shakar, pop_artists_col, big_dawgs = st.columns(4, vertical_alignment="center", border=False)
 
-top_artists = df['artist_name'].value_counts(sort=True).head()
-# Reset the index and add 1 to start the index at 1
-top_artists = top_artists.reset_index().rename(columns={'index': 'Artist', 'artist_name': 'Artist', 'count': 'Count'})
-top_artists.index = top_artists.index + 1
+@st.cache_data
+def get_top_prolific_artists(df):
+    top_prol_artists = df['artist_name'].value_counts(sort=True).head()
+    top_prol_artists = top_prol_artists.reset_index().rename(columns={'index': 'Artist', 'artist_name': 'Artist', 'count': 'Count'})
+    top_prol_artists.index = top_prol_artists.index + 1
+    return top_prol_artists
 
 # Add a title
-top_prol_artist.write("### Top 5 Most Prolific Artists")
+top_prol_artists_col.write("### Top 5 Most Prolific Artists")
 
 # Display the table
-top_prol_artist.table(top_artists)
-shakar.image('shankar_mahadevan.jpeg', width=200)
+top_prol_artists = get_top_prolific_artists(df)
+top_prol_artists_col.table(top_prol_artists)
+shakar.image('shankar_mahadevan.jpeg', width=270)
 
-col3.write('col3')
-col4.write('col4')
+@st.cache_data
+def get_top_popular_artists(df):
+    pop_artists = df.sort_values('popularity', ascending=False).head().reset_index()
+    pop_artists = pop_artists[['track_name', 'artist_name', 'popularity']]
+    pop_artists.index = pop_artists.index + 1
+    pop_artists = pop_artists.rename(columns={'index': 'Rank', 'track_name': 'Track', 'artist_name': 'Artist', 'popularity': 'Popularity'})
+    pop_artists['Track'] = pop_artists['Track'].str.slice(0, 15)
+    return pop_artists
+
+pop_artists_col.write("### Top 5 Most Popular Artists")
+pop_artists = get_top_popular_artists(df)
+pop_artists_col.table(pop_artists)
+big_dawgs.image('big_dawgs.jpeg', width=270)
 
 @st.cache_data
 def year_to_decade(year):
