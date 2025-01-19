@@ -37,7 +37,7 @@ df = load_data("spotify_dataset.csv")
 english_songs = df[df["language"] == "English"]
 non_eng = df[df["language"] != "English"]
 
-top_prol_artists_col, shakar, pop_artists_col, big_dawgs = st.columns(4, vertical_alignment="center", border=False)
+top_prol_artists_col, shakar, pop_artists_col, big_dawgs = st.columns(4, vertical_alignment="top", border=False)
 
 @st.cache_data
 def get_top_prolific_artists(df):
@@ -52,6 +52,12 @@ top_prol_artists_col.write("### Top 5 Most Prolific Artists")
 # Display the table
 top_prol_artists = get_top_prolific_artists(df)
 top_prol_artists_col.table(top_prol_artists)
+top_prol_artists_col.write('### Dataset Statistics')
+top_prol_artists_col.write('Total number of songs: 62,317')
+top_prol_artists_col.write('Total number of artists: 12,513')
+top_prol_artists_col.write('Between 1971 and 2024')
+top_prol_artists_col.write('Most songs written in 2023, least in 1976')
+
 shakar.image('shankar_mahadevan.jpeg', width=270)
 
 @st.cache_data
@@ -60,7 +66,7 @@ def get_top_popular_artists(df):
     pop_artists = pop_artists[['track_name', 'artist_name', 'popularity']]
     pop_artists.index = pop_artists.index + 1
     pop_artists = pop_artists.rename(columns={'index': 'Rank', 'track_name': 'Track', 'artist_name': 'Artist', 'popularity': 'Popularity'})
-    pop_artists['Track'] = pop_artists['Track'].str.slice(0, 15)
+    pop_artists['Track'] = pop_artists['Track'].apply(lambda x: x.split(' - ')[0])
     return pop_artists
 
 pop_artists_col.write("### Top 5 Most Popular Artists")
@@ -112,40 +118,51 @@ def plot_songs_by_decade(df):
 @st.cache_data
 def plot_songs_by_language(df):
     # Songs by Language
-    df_sorted = df["language"].value_counts().sort_values().reset_index()
-    df_sorted.columns = ["language", "count"]
-
-    canv = plt.figure(
-        figsize=(20, 8), facecolor="white"
-    )  # blank canvas with background
-    grid = canv.add_gridspec(1, 1)  # grid layout
-    subplot = canv.add_subplot(grid[0, 0])  # subplot
-
-    subplot.text(
-        3.5,
-        28000,
-        "Songs by Language",
-        fontsize=25,
-        fontweight="bold",
-        fontfamily="monospace",
+    df_sorted_lang = df["language"].value_counts().sort_values().reset_index()
+    df_sorted_lang.columns = ["language", "count"]
+    
+    palette_color = sns.color_palette('bright') 
+    
+    canv = plt.figure(figsize=(4, 2.5))
+    plt.pie(
+        df_sorted_lang['count'], 
+        labels=df_sorted_lang['language'], 
+        colors=palette_color, 
+        autopct='%1.1f%%',
+        textprops={'fontsize': 3}
     )
+    plt.title('Songs by Language', fontsize=6)
+    # canv = plt.figure(
+    #     figsize=(20, 8), facecolor="white"
+    # )  # blank canvas with background
+    # grid = canv.add_gridspec(1, 1)  # grid layout
+    # subplot = canv.add_subplot(grid[0, 0])  # subplot
 
-    # Dotted horizontal gridlines
-    subplot.grid(color="black", linestyle=":", axis="y", zorder=0, dashes=(1, 5))
+    # subplot.text(
+    #     3.5,
+    #     28000,
+    #     "Songs by Language",
+    #     fontsize=25,
+    #     fontweight="bold",
+    #     fontfamily="monospace",
+    # )
 
-    sns.barplot(data=df_sorted, x="language", y="count", ax=subplot, alpha=1, zorder=2)
+    # # Dotted horizontal gridlines
+    # subplot.grid(color="black", linestyle=":", axis="y", zorder=0, dashes=(1, 5))
 
-    # Remove border lines
-    for direction in ["top", "right", "left"]:
-        subplot.spines[direction].set_visible(False)
+    # sns.barplot(data=df_sorted_lang, x="language", y="count", ax=subplot, alpha=1, zorder=2)
 
-    subplot.set_xlabel("Language", fontsize=14, fontweight="bold")
-    subplot.tick_params(axis="x", labelsize=14)
-    subplot.tick_params(axis="y", length=0, labelsize=13)
-    subplot.set_ylabel(
-        "",
-    )
-    subplot.invert_xaxis()
+    # # Remove border lines
+    # for direction in ["top", "right", "left"]:
+    #     subplot.spines[direction].set_visible(False)
+
+    # subplot.set_xlabel("Language", fontsize=14, fontweight="bold")
+    # subplot.tick_params(axis="x", labelsize=14)
+    # subplot.tick_params(axis="y", length=0, labelsize=13)
+    # subplot.set_ylabel(
+    #     "",
+    # )
+    # subplot.invert_xaxis()
     return canv
 
 # Tableau embed code
