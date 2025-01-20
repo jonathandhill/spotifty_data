@@ -52,11 +52,7 @@ top_prol_artists_col.write("### Top 5 Most Prolific Artists")
 # Display the table
 top_prol_artists = get_top_prolific_artists(df)
 top_prol_artists_col.table(top_prol_artists)
-top_prol_artists_col.write('### Dataset Statistics')
-top_prol_artists_col.write('Total number of songs: 62,317')
-top_prol_artists_col.write('Total number of artists: 12,513')
-top_prol_artists_col.write('Between 1971 and 2024')
-top_prol_artists_col.write('Most songs written in 2023, least in 1976')
+
 
 shakar.image('shankar_mahadevan.jpeg', width=270)
 
@@ -69,10 +65,58 @@ def get_top_popular_artists(df):
     pop_artists['Track'] = pop_artists['Track'].apply(lambda x: x.split(' - ')[0])
     return pop_artists
 
+@st.cache_data
+def plot_songs_by_language(df):
+    #Only display percentage if percentage > 5%
+    def autopct_func(pct):
+        return ('%1.1f%%' % pct) if pct > 5 else ''
+    # Songs by Language
+    df_sorted_lang = df["language"].value_counts().sort_values().reset_index()
+    df_sorted_lang.columns = ["language", "count"]
+    
+    palette_color = sns.color_palette('bright') 
+    
+    #Only display labels if percentage > 5%
+    total_count = df_sorted_lang['count'].sum()
+    labels = [
+        f"{label}" if count / total_count > 0.05 else ''
+        for label, count in zip(df_sorted_lang['language'], df_sorted_lang['count'])
+    ]
+    
+    canv = plt.figure(figsize=(2.5, 2.5))
+    plt.pie(
+        df_sorted_lang['count'], 
+        labels=labels, 
+        colors=palette_color, 
+        autopct=autopct_func,
+        textprops={'fontsize': 6}
+    )
+    plt.title('Songs by Language', fontsize=10)
+    plt.text(0, -1.2, 'Remaining slices: Telagu (5%) and Malayalam (5%)', ha='right', fontsize=3.5)
+    plt.tight_layout() 
+   
+    return canv
+
 pop_artists_col.write("### Top 5 Most Popular Artists")
 pop_artists = get_top_popular_artists(df)
 pop_artists_col.table(pop_artists)
 big_dawgs.image('big_dawgs.jpeg', width=270)
+
+data_stats_col, language_pie_col = st.columns(2, vertical_alignment="center", border=False)
+data_stats_col.write('### Dataset Statistics')
+total_songs = len(df)
+total_artists = df['artist_name'].nunique()
+year_range = f"{df['year'].min()} and {df['year'].max()}"
+most_songs_year = df['year'].value_counts().idxmax()
+least_songs_year = df['year'].value_counts().idxmin()
+
+data_stats_col.write(f'Total number of songs: {total_songs}')
+data_stats_col.write(f'Total number of artists: {total_artists}')
+data_stats_col.write(f'Between {year_range}')
+data_stats_col.write(f'Most songs written in {most_songs_year}, least in {least_songs_year}')
+
+language_pie_chart = plot_songs_by_language(df)
+language_pie_col.pyplot(language_pie_chart)
 
 @st.cache_data
 def year_to_decade(year):
@@ -115,55 +159,7 @@ def plot_songs_by_decade(df):
     ax.invert_xaxis()
     return fig
 
-@st.cache_data
-def plot_songs_by_language(df):
-    # Songs by Language
-    df_sorted_lang = df["language"].value_counts().sort_values().reset_index()
-    df_sorted_lang.columns = ["language", "count"]
-    
-    palette_color = sns.color_palette('bright') 
-    
-    canv = plt.figure(figsize=(4, 2.5))
-    plt.pie(
-        df_sorted_lang['count'], 
-        labels=df_sorted_lang['language'], 
-        colors=palette_color, 
-        autopct='%1.1f%%',
-        textprops={'fontsize': 3}
-    )
-    plt.title('Songs by Language', fontsize=6)
-    # canv = plt.figure(
-    #     figsize=(20, 8), facecolor="white"
-    # )  # blank canvas with background
-    # grid = canv.add_gridspec(1, 1)  # grid layout
-    # subplot = canv.add_subplot(grid[0, 0])  # subplot
 
-    # subplot.text(
-    #     3.5,
-    #     28000,
-    #     "Songs by Language",
-    #     fontsize=25,
-    #     fontweight="bold",
-    #     fontfamily="monospace",
-    # )
-
-    # # Dotted horizontal gridlines
-    # subplot.grid(color="black", linestyle=":", axis="y", zorder=0, dashes=(1, 5))
-
-    # sns.barplot(data=df_sorted_lang, x="language", y="count", ax=subplot, alpha=1, zorder=2)
-
-    # # Remove border lines
-    # for direction in ["top", "right", "left"]:
-    #     subplot.spines[direction].set_visible(False)
-
-    # subplot.set_xlabel("Language", fontsize=14, fontweight="bold")
-    # subplot.tick_params(axis="x", labelsize=14)
-    # subplot.tick_params(axis="y", length=0, labelsize=13)
-    # subplot.set_ylabel(
-    #     "",
-    # )
-    # subplot.invert_xaxis()
-    return canv
 
 # Tableau embed code
 tableau_html = """
@@ -277,5 +273,4 @@ for idx, (feature, col) in enumerate(zip(audio_features, cols)):
 fig = plot_songs_by_decade(df)
 st.pyplot(fig)
 
-canv = plot_songs_by_language(df)
-st.pyplot(canv)
+
