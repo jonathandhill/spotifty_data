@@ -19,26 +19,32 @@ st.markdown(
     """,
     unsafe_allow_html=True
 )
-
-st.markdown('<h1 class="centered-title">Spotify Dataset Analysis</h1>', unsafe_allow_html=True)
-st.markdown('<div style="display: flex; flex-wrap: wrap; gap: 4px; justify-content: center;"><img src="https://img.shields.io/badge/python-3670A0?style=for-the-badge&logo=python&logoColor=ffdd54" height="32" alt="Python" style="margin-right: 4px"><img src="https://img.shields.io/badge/-Pandas-333333?style=flat&logo=pandas" height="32" alt="Pandas" style="margin-right: 4px"><img src="https://img.shields.io/badge/-Matplotlib-000000?style=flat&logo=python" height="32" alt="Matplotlib" style="margin-right: 4px"><img src="https://img.shields.io/static/v1?label=Powered%20by&message=seaborn&color=E523F5&style=flat" height="32" alt="Seaborn" style="margin-right: 4px"><img src="https://img.shields.io/badge/Jupyter-notebook-brightgreen" height="32" alt="Jupyter" style="margin-right: 4px"><img src="https://img.shields.io/badge/Tableau-E97627?style=for-the-badge&logo=Tableau&logoColor=white" height="32" alt="Tableau" style="margin-right: 4px"></div>', unsafe_allow_html=True)
-st.markdown('<h2 class="centered-header">Jonathan Hill</h2>', unsafe_allow_html=True)
-st.markdown('<p align="center"><a href="https://www.linkedin.com/in/jonathanburthill/" target="_blank"><img src="https://img.shields.io/badge/LinkedIn-0077B5?style=for-the-badge&logo=linkedin&logoColor=white" height="28" style="margin-right: 4px"></a> <a href="https://github.com/jonathandhill" target="_blank"><img src="https://img.shields.io/badge/GitHub-100000?style=for-the-badge&logo=github&logoColor=white" height="28" style="margin-right: 4px"></a> <a href="mailto:jonathan.burt.hill@gmail.com" aria-label="Send an email to Jonathan Hill"><img src="https://img.shields.io/badge/Gmail-D14836?style=for-the-badge&logo=gmail&logoColor=white" height="28" style="margin-right: 4px"></a></p>', unsafe_allow_html=True)
-with st.expander('See business case & data issues'):
-    st.write('This project investigates how popular music has evolved over time through analysis of Spotify\'s audio feature data. Using metrics such as acousticness, danceability, energy, tempo, and valence, we\'ll examine trends in musical characteristics across different time periods. The analysis will focus on quantifying and visualizing changes in these musical attributes to understand how production styles and preferences have shifted. Our goal is to uncover meaningful patterns in how music has transformed, potentially revealing insights about changing cultural tastes and production techniques.')
-
-st.divider()
-
 @st.cache_data
 def load_data(path):
     df = pd.read_csv(path)
     return df
 
-
 df = load_data("spotify_dataset.csv")
 
 english_songs = df[df["language"] == "English"]
 non_eng = df[df["language"] != "English"]
+
+time_sig_one = len(df[df['time_signature'] == 1.0])
+
+st.markdown('<h1 class="centered-title">Spotify Dataset Analysis</h1>', unsafe_allow_html=True)
+st.markdown('<div style="display: flex; flex-wrap: wrap; gap: 4px; justify-content: center;"><img src="https://img.shields.io/badge/python-3670A0?style=for-the-badge&logo=python&logoColor=ffdd54" height="32" alt="Python" style="margin-right: 4px"><img src="https://img.shields.io/badge/-Pandas-333333?style=flat&logo=pandas" height="32" alt="Pandas" style="margin-right: 4px"><img src="https://img.shields.io/badge/-Matplotlib-000000?style=flat&logo=python" height="32" alt="Matplotlib" style="margin-right: 4px"><img src="https://img.shields.io/static/v1?label=Powered%20by&message=seaborn&color=E523F5&style=flat" height="32" alt="Seaborn" style="margin-right: 4px"><img src="https://img.shields.io/badge/Jupyter-notebook-brightgreen" height="32" alt="Jupyter" style="margin-right: 4px"><img src="https://img.shields.io/badge/Tableau-E97627?style=for-the-badge&logo=Tableau&logoColor=white" height="32" alt="Tableau" style="margin-right: 4px"></div>', unsafe_allow_html=True)
+st.markdown('<h2 class="centered-header">Jonathan Hill</h2>', unsafe_allow_html=True)
+st.markdown('<p align="center"><a href="https://www.linkedin.com/in/jonathanburthill/" target="_blank"><img src="https://img.shields.io/badge/LinkedIn-0077B5?style=for-the-badge&logo=linkedin&logoColor=white" height="28" style="margin-right: 4px"></a> <a href="https://github.com/jonathandhill" target="_blank"><img src="https://img.shields.io/badge/GitHub-100000?style=for-the-badge&logo=github&logoColor=white" height="28" style="margin-right: 4px"></a> <a href="mailto:jonathan.burt.hill@gmail.com" aria-label="Send an email to Jonathan Hill"><img src="https://img.shields.io/badge/Gmail-D14836?style=for-the-badge&logo=gmail&logoColor=white" height="28" style="margin-right: 4px"></a></p>', unsafe_allow_html=True)
+with st.expander('See business case & general data issues'):
+    st.write('### Business Case')
+    st.write('This project investigates how popular music has evolved over time through analysis of Spotify\'s audio feature data. Using metrics such as acousticness, danceability, energy, tempo, and valence, we\'ll examine trends in musical characteristics across different time periods. The analysis will focus on quantifying and visualizing changes in these musical attributes to understand how production styles and preferences have shifted. Our goal is to uncover meaningful patterns in how music has transformed, potentially revealing insights about changing cultural tastes and production techniques.')
+    st.write('### General Data Issues')
+    st.write('*Time Signature:*')
+    st.write('- Incorrect values (e.g. Maroon 5 songs *Cold* has 0.0 value, *Nobody’s Love - Remix* has 1.0 value. *Not Afraid* by Eminem has 5.0 value)')
+    st.write(f'- {time_sig_one} songs with value of 1.0')
+
+st.divider()
+
 
 st.sidebar.write('### Statistics')
 total_songs = len(df)
@@ -47,8 +53,8 @@ year_range = f"{df['year'].min()} and {df['year'].max()}"
 most_songs_year = df['year'].value_counts().idxmax()
 least_songs_year = df['year'].value_counts().idxmin()
 
-st.sidebar.write(f'Total number of songs: {total_songs}')
-st.sidebar.write(f'Total number of artists: {total_artists}')
+st.sidebar.write(f'Total number of songs: {total_songs:,}')
+st.sidebar.write(f'Total number of artists: {total_artists:,}')
 st.sidebar.write(f'Between {year_range}')
 st.sidebar.write(f'Most songs written in {most_songs_year}, least in {least_songs_year}')
 
@@ -57,8 +63,8 @@ st.sidebar.write('*Acousticness* - A confidence measure of whether the track is 
 st.sidebar.write('*Danceability* - How suitable a track is for dancing based on a combination of musical elements including tempo, rhythm stability, beat strength, and overall regularity. ')
 st.sidebar.write('*Energy* - Represents a perceptual measure of intensity and activity. Features contributing to this attribute include dynamic range, perceived loudness, timbre, onset rate, and general entropy.')
 st.sidebar.write('*Instrumentalness* - Predicts whether a track contains no vocals.')
-st.sidebar.write('*Liveness* - Detects the presence of an audience in the recording. Higher liveness values represent an increased probability that the track was performed live.')
-st.sidebar.write('*Valence* - The musical positiveness conveyed by a track. Tracks with high valence sound more positive (e.g. happy, cheerful, euphoric), while tracks with low valence sound more negative (e.g. sad, depressed, angry).')
+st.sidebar.write('*Liveness* - Higher liveness values represent an increased probability that the track was performed live (with an audience).')
+st.sidebar.write('*Valence* - The musical positiveness. Tracks with high valence sound more positive (e.g. happy, cheerful, euphoric), while tracks with low valence sound more negative (e.g. sad, depressed, angry).')
 
 top_prol_artists_col, shakar, pop_artists_col, big_dawgs = st.columns(4, vertical_alignment="center", border=False)
 
@@ -252,8 +258,8 @@ if any(st.session_state.features_to_plot.values()):
     ax.tick_params(axis="y", labelsize=14)
     ax.tick_params(axis="x", labelsize=14)
     ax.tick_params(axis="y", length=0)
-    ax.set_xlabel("Year", fontsize=15, fontweight="bold")
-    ax.set_ylabel("")
+    ax.set_xlabel("Year", fontsize=13, fontweight="bold")
+    ax.set_ylabel("Average value", fontsize=13, fontweight="bold")
     legend = ax.legend(loc="upper right", fontsize=10)
 
     # Change legend labels to uppercase
