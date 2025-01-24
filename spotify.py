@@ -30,18 +30,24 @@ english_songs = df[df["language"] == "English"]
 non_eng = df[df["language"] != "English"]
 
 time_sig_one = len(df[df['time_signature'] == 1.0])
+zero_pop = len(df[df['popularity'] == 0])
 
 st.markdown('<h1 class="centered-title">Spotify Dataset Analysis</h1>', unsafe_allow_html=True)
 st.markdown('<div style="display: flex; flex-wrap: wrap; gap: 4px; justify-content: center;"><img src="https://img.shields.io/badge/python-3670A0?style=for-the-badge&logo=python&logoColor=ffdd54" height="32" alt="Python" style="margin-right: 4px"><img src="https://img.shields.io/badge/-Pandas-333333?style=flat&logo=pandas" height="32" alt="Pandas" style="margin-right: 4px"><img src="https://img.shields.io/badge/-Matplotlib-000000?style=flat&logo=python" height="32" alt="Matplotlib" style="margin-right: 4px"><img src="https://img.shields.io/static/v1?label=Powered%20by&message=seaborn&color=E523F5&style=flat" height="32" alt="Seaborn" style="margin-right: 4px"><img src="https://img.shields.io/badge/Jupyter-notebook-brightgreen" height="32" alt="Jupyter" style="margin-right: 4px"><img src="https://img.shields.io/badge/Tableau-E97627?style=for-the-badge&logo=Tableau&logoColor=white" height="32" alt="Tableau" style="margin-right: 4px"></div>', unsafe_allow_html=True)
 st.markdown('<h2 class="centered-header">Jonathan Hill</h2>', unsafe_allow_html=True)
 st.markdown('<p align="center"><a href="https://www.linkedin.com/in/jonathanburthill/" target="_blank"><img src="https://img.shields.io/badge/LinkedIn-0077B5?style=for-the-badge&logo=linkedin&logoColor=white" height="28" style="margin-right: 4px"></a> <a href="https://github.com/jonathandhill" target="_blank"><img src="https://img.shields.io/badge/GitHub-100000?style=for-the-badge&logo=github&logoColor=white" height="28" style="margin-right: 4px"></a> <a href="mailto:jonathan.burt.hill@gmail.com" aria-label="Send an email to Jonathan Hill"><img src="https://img.shields.io/badge/Gmail-D14836?style=for-the-badge&logo=gmail&logoColor=white" height="28" style="margin-right: 4px"></a></p>', unsafe_allow_html=True)
-with st.expander('See business case & general data issues'):
+with st.expander('See business case & data issues'):
     st.write('### Business Case')
     st.write('This project investigates how popular music has evolved over time through analysis of Spotify\'s audio feature data. Using metrics such as acousticness, danceability, energy, tempo, and valence, we\'ll examine trends in musical characteristics across different time periods. The analysis will focus on quantifying and visualizing changes in these musical attributes to understand how production styles and preferences have shifted. Our goal is to uncover meaningful patterns in how music has transformed, potentially revealing insights about changing cultural tastes and production techniques.')
     st.write('### General Data Issues')
     st.write('*Time Signature:*')
-    st.write('- Incorrect values (e.g. Maroon 5 songs *Cold* has 0.0 value, *Nobody’s Love - Remix* has 1.0 value. *Not Afraid* by Eminem has 5.0 value)')
-    st.write(f'- {time_sig_one} songs with value of 1.0')
+    st.write(f'- Incorrect values (e.g. Maroon 5 songs *Cold* has \'0.0\' value, *Nobody’s Love - Remix* has \'1.0\' value. *Not Afraid* by Eminem has \'5.0\' value). {time_sig_one} songs with value of \'1.0\'')
+    st.write('*Artist:*')
+    st.write('- A track is often by multiple artists (e.g. *Mayakiriye Sirikiriye - Orchestral EDM* by Anirudh Ravichander, Anivee, Alvin Bruno) so most prolific table prioritises single artist songs')
+    st.write('*Popularity:*')
+    st.write(f'- {zero_pop:,} tracks have \'0\' value (e.g. *Locked Out* of Heaven by Bruno Mars)')
+    st.write('*Language:*')
+    st.write('- Incorrect values (e.g. some Tamil songs by Santhosh Narayanan have \'English\' value)')
 
 st.divider()
 
